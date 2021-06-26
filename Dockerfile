@@ -1,6 +1,6 @@
 FROM node
-WORKDIR /browserlseeBackend
+WORKDIR /browserlessBackend
 COPY package.json .
 RUN npm install
-COPY Browserless-Backend ./
-CMD ["node","main.js"]
+COPY Browserless-Backend /browserlessBackend/app
+CMD ["node", "./app/main.js"]

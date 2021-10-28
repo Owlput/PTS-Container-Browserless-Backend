@@ -1,0 +1,22 @@
+{
+  "name": "pts-containers-browserless-backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./build/main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Owlput/PTS-Container-Browserless-Backend.git"
+  },
+  "author": "DrHuangMHT",
+  "license": "AGPL-3.0-or-later",
+  "bugs": {
+    "url": "https://github.com/Owlput/PTS-Container-Browserless-Backend/issues"
+  },
+  "homepage": "https://github.com/Owlput/PTS-Container-Browserless-Backend#readme",
+  "devDependencies": {
+    "@types/node": "^16.11.6"
+  }
+}

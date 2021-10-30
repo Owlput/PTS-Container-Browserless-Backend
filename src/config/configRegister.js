@@ -1,8 +1,9 @@
-const fs = require("fs");
-exports.blbeGetConfig = function() {
+const fs = require('fs')
+const path = require('path')
+module.exports = function blbeGetConfig() {
     let configObject
     try {
-      configObject = JSON.parse(fs.readFileSync("./config/config.json", "utf-8"));
+      configObject = JSON.parse(fs.readFileSync(path.join(__dirname,"config.json"), "utf-8"));
       
      }
   catch (err) {

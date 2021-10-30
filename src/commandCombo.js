@@ -1,9 +1,5 @@
-export default class CommandCombo {
-  private rawInput: string;
-  private flags: Set<string>;
-  private splitted: string[];
-  private params: Array<Array<string>>;
-  constructor(cmd: string) {
+module.exports =  class CommandCombo {
+  constructor(cmd) {
     this.rawInput = cmd;
     this.splitted = cmd.split(/\s*\s\s*/).map((cmd) => cmd.trim());
     this.flags = new Set(
@@ -30,16 +26,25 @@ export default class CommandCombo {
       } else continue;
     }
   }
-  getSplitted():number {
-    return this.splitted.length;
+  getSplitted() {
+    return this.splitted;
   }
-  getRaw(): string {
+  getRaw() {
     return this.rawInput;
   }
-  getFlags():Set<string> {
+  getFlags() {
     return this.flags;
   }
-  getParams():Array<Array<string>> {
+  getParams() {
     return this.params;
+  }
+  toString() {
+    let j = {
+      raw: this.rawInput,
+      splitted: this.splitted,
+      flags: this.flags,
+      params: this.params,
+    };
+    return JSON.stringify(j);
   }
 }

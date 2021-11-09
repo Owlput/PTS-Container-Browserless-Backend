@@ -1,5 +1,6 @@
 const net = require("net");
 const readline = require("readline");
+const CommandCombo = require("./commandCombo");
 const commandRouter = require("./commandRouter");
 const blbeGetConfig = require("./config/configRegister");
 
@@ -14,10 +15,10 @@ blbe.listen(globalConfig.port, () =>
 ); // Listening connections
 blbe.on("connection", (socket) => {
   inputHandler(socket) //Process incoming requests
-    .then(() => socket.end)
+    .then(() => socket.destroy())
     .catch((err) => {
       console.error(err); //Error handler
-      socket.end();
+      socket.destroy();
     });
 });
 
@@ -25,11 +26,15 @@ async function inputHandler(socket) {
   let interf = readline.createInterface({
     input: socket,
     output: socket,
-    prompt: ">>",
+    prompt: "PBT>>",
   });
   write("Terminal connected");
   function write(text, prompt = true) {
-    socket.write(`${text}\r\n`);
+    if (text) {
+      socket.write(`${text}\r\n`);
+    } else {
+      socket.write(`\r`);
+    }
     if (prompt) interf.prompt();
   }
   let history = {
@@ -60,9 +65,6 @@ async function inputHandler(socket) {
     passthrough: { progress() {} },
     inside: false,
   };
-  function clearMemory() {
-    state.inputMemory = [];
-  }
   function setPassthrough(target) {
     state.passthrough = target;
   }
@@ -71,25 +73,34 @@ async function inputHandler(socket) {
   }
   for await (let input of interf) {
     history.add(input);
+    if (input === "$exit") {
+      let exit = false;
+      switch (state.inside) {
+        case true: {
+          write("Aborted.");
+          state.inside = false;
+          state.passthrough = { progress() {} };
+          continue;
+        }
+        case false: {
+          write("Press enter to exit the terminal");
+          exit = true;
+          break;
+        }
+      }
+      state.inside = false;
+      state.passthrough = { progress() {} };
+      if (exit) return;
+    }
     if (state.inside === false) {
       console.log("state:escaped");
-      commandRouter(input, setPassthrough, setInside, write);
-      state.passthrough.progress(
-        write,
-        setInside,
-        setPassthrough,
-        input
-      );
-      clearMemory();
+      let command = new CommandCombo(input);
+      commandRouter(command, setPassthrough, setInside, write);
+      state.passthrough.progress(write, setInside, setPassthrough, command);
     } else if (state.inside === true) {
       console.log("state:inside");
       console.log(state.inputMemory);
-      state.passthrough.progress(
-        write,
-        setInside,
-        setPassthrough,
-        input
-      );
+      state.passthrough.progress(write, setInside, setPassthrough, input);
     } else {
       setInside(false);
       write("Internal error encountered, now exiting");

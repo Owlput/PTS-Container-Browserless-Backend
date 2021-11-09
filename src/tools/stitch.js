@@ -1,11 +1,8 @@
-const CommandCombo = require("../commandCombo");
-
-module.exports = function stitchEntry(cmd, setPassthrough, setInside) {
-  let command = new CommandCombo(cmd);
+module.exports = function stitchEntry(command, setPassthrough, setInside) {
   setInside(true);
-  if (command.splitted[0] === "stitch") {
+  if (!command.splitted[1]) {
     setPassthrough(stitch);
-  }
+  } else if (command.flags.has("-s")) setPassthrough(stitch_s);
 };
 let stitch = {
   stage: "0",
@@ -22,22 +19,22 @@ let stitch = {
         case 1: {
           this.mem[0] = input;
           this.checking = -1;
-          checkNoting(this.mem,write);
+          checkNoting(this.mem, write);
           this.stage = "checking";
-          return
+          return;
         }
-        case 2:{
-          this.mem[1]=input
-          this.checking = -1
-          checkNoting(this.mem,write);
-          this.stage = "checking"
-          return
+        case 2: {
+          this.mem[1] = input;
+          this.checking = -1;
+          checkNoting(this.mem, write);
+          this.stage = "checking";
+          return;
         }
-        case 0:{
-          this.mem[0]=input
-          write("Please re-enter text2")
-          this.checking = 2
-          return
+        case 0: {
+          this.mem[0] = input;
+          write("Please re-enter text2");
+          this.checking = 2;
+          return;
         }
       }
     }
@@ -55,7 +52,7 @@ let stitch = {
       }
       case "2": {
         this.mem[1] = input;
-        checkNoting(this.mem,write);
+        checkNoting(this.mem, write);
         this.stage = "checking";
         break;
       }
@@ -78,22 +75,32 @@ let stitch = {
           }
           case "y": {
             write(`${this.mem[0] + this.mem[1]}`);
-            this.stage = "0"
-            this.mem=["",""]
-            this.checking=-1
-            setInside(false)
-            setPassthrough(defaultPassthrough)
+            this.stage = "0";
+            this.mem = ["", ""];
+            this.checking = -1;
+            setInside(false);
+            setPassthrough(defaultPassthrough);
           }
         }
       }
     }
   },
 };
-function checkNoting(mem,write){
+let stitch_s = {
+  progress(write, setInside, setPassthrough, command) {
+    setInside(false);
+    write(`${command.splitted[2] + command.splitted[3]}`);
+    setPassthrough(defaultPassthrough);
+  },
+};
+function checkNoting(mem, write) {
   write(`Please check your input
-  text1:${mem[0]} , text2:${mem[1]}\n
-  Answer "y" to continue, "?text" for correcting all, \n
-  "?text1" for correcting text1, "?text2" for correcting text2.
-`);
+  text1:${mem[0]} , text2:${mem[1]}
+  Answer "y" to continue, "?text" for correcting all, 
+  "?text1" for correcting text1, "?text2" for correcting text2.`);
 }
-const defaultPassthrough = { progress() {} }
+const defaultPassthrough = {
+  progress(write) {
+    write();
+  },
+};
